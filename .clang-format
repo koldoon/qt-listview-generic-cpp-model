@@ -1,0 +1,22 @@
+﻿BasedOnStyle: WebKit
+BreakBeforeBraces: Custom
+SpacesInContainerLiterals: true
+SpacesInParentheses: true
+SpacesInSquareBrackets: false
+SpaceBeforeParens: true
+AlignConsecutiveDeclarations: true
+AlignConsecutiveAssignments: false
+AlwaysBreakTemplateDeclarations: true
+SpaceAfterTemplateKeyword: true
+AllowShortCaseLabelsOnASingleLine: true
+IndentCaseLabels: true
+IndentPPDirectives: AfterHash
+AlignTrailingComments: true
+CompactNamespaces: false
+NamespaceIndentation: All
+MaxEmptyLinesToKeep: 2
+BraceWrapping:
+  AfterEnum: false
+  AfterStruct: false
+  BeforeElse: true
+  BeforeCatch: true

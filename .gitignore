@@ -1,0 +1,33 @@
+# Qmake and other User files
+*.user
+*.txt.user
+*.autosave
+.qmake.stash
+
+# MacOS X folder preferences files
+.DS_Store
+
+# Generated make files
+Makefile
+Makefile.*
+
+# Generated objects files
+*.o
+*.a
+*.so
+*.so.*
+
+# Compliled files
+*.exe
+*.dll
+
+# MacOS X generated dynamic libraries
+*.dylib
+
+# QML cache files
+*.qmlc
+
+# IDE settings
+.idea/
+cmake-build-debug
+cmake-build-release
