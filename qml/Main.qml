@@ -8,7 +8,7 @@ Window {
     visible: true
     width: 500
     height: 500
-    title: qsTr("c++ list model example")
+    title: qsTr("c++ generic list model example")
 
 
     Provider {

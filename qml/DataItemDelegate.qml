@@ -22,7 +22,7 @@ Row {
         width: 200
         height: input.implicitHeight
         color: "#D8D8D8"
-        border.color: "#979797"
+        border.color: "#B6B5B5"
 
         TextInput {
             id: input

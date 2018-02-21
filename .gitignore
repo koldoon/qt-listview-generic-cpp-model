@@ -1,4 +1,4 @@
-# Qmake and other User files
+# Qt Creator and other User files
 *.user
 *.txt.user
 *.autosave

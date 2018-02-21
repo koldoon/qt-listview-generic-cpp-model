@@ -6,7 +6,7 @@
 #include <QObject>
 #include <QSharedPointer>
 
-// Generate class implementation with MACRO defined in "list_model.h"
+// Generate class implementation using MACRO defined in "list_model.h"
 DECLARE_LIST_MODEL( ListModel_DataItem, app::DataItem )
 
 // "app" namespace is defined on purpose to show the case of using

@@ -53,11 +53,9 @@ namespace __listmodel {
 
     protected:
         // Create "count" indices and push them to end
-        // Notify view about indices adding.
         void push( int count = 1 );
 
         // Remove "count" indices from the end.
-        // Notify view about items removing
         void pop( int count = 1 );
 
         // Remove indices at particular place.
