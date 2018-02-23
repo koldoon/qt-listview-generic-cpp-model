@@ -14,7 +14,7 @@
 //      + void insert( int i, const QSharedPointer<ITEM_TYPE>& item )
 //      + int length() const
 //      + const QList<QSharedPointer<ITEM_TYPE>>& list() const  // internal storage accessor
-//      # Q_INVOKABLE ITEM_TYPE* item( int i ) const            // QML Invokable ONLY!
+//      # Q_INVOKABLE ITEM_TYPE* item( int i, bool keepOwnership ) const   // QML Invokable
 //
 // Basically, it provides indices and changes signals to view,
 // plus QList-like interface to feed and change internal storage (QList<QSharedPointer>).
@@ -36,6 +36,7 @@
 #include <QAbstractListModel>
 #include <QList>
 #include <QObject>
+#include <QQmlEngine>
 #include <QSharedPointer>
 
 // private namespace with internal implementation
@@ -150,25 +151,33 @@ namespace __listmodel {
             return storage.length();
         }
 
+        // conventional method
+        int count() const {
+            return storage.length();
+        }
+
     protected:
         QList<QSharedPointer<ItemType>> storage;
     };
 }
 
 
-#define DECLARE_LIST_MODEL( NAME, ITEM_TYPE )                               \
-    class NAME : public __listmodel::ListModelImplTemplate<ITEM_TYPE> {     \
-        Q_OBJECT                                                            \
-                                                                            \
-    protected:                                                              \
-        Q_INVOKABLE ITEM_TYPE* item( int i ) const {                        \
-            if ( i >= 0 && i < storage.length() && storage.length() > 0 ) { \
-                return storage[i].data();                                   \
-            }                                                               \
-            else {                                                          \
-                return Q_NULLPTR;                                           \
-            }                                                               \
-        }                                                                   \
-    };                                                                      \
-                                                                            \
+#define DECLARE_LIST_MODEL( NAME, ITEM_TYPE )                                        \
+    class NAME : public __listmodel::ListModelImplTemplate<ITEM_TYPE> {              \
+        Q_OBJECT                                                                     \
+                                                                                     \
+    protected:                                                                       \
+        Q_INVOKABLE ITEM_TYPE* item( int i, bool keepOwnership = true ) const {      \
+            if ( i >= 0 && i < storage.length() && storage.length() > 0 ) {          \
+                auto obj = storage[i].data();                                        \
+                if ( keepOwnership )                                                 \
+                    QQmlEngine::setObjectOwnership( obj, QQmlEngine::CppOwnership ); \
+                return obj;                                                          \
+            }                                                                        \
+            else {                                                                   \
+                return Q_NULLPTR;                                                    \
+            }                                                                        \
+        }                                                                            \
+    };                                                                               \
+                                                                                     \
     Q_DECLARE_METATYPE( NAME* )
