@@ -9,57 +9,57 @@ namespace __listmodel {
 
 
     void IndicesListModelImpl::push( int count ) {
-        insertAt( length, count );
+        insertAt( m_count, count );
     }
 
 
     void IndicesListModelImpl::pop( int count ) {
-        return removeAt( length - count, count );
+        return removeAt( m_count - count, count );
     }
 
 
     void IndicesListModelImpl::removeAt( int index, int count ) {
-        if ( index < 0 || index + count > length || length == 0 || count < 1 )
+        if ( index < 0 || index + count > m_count || m_count == 0 || count < 1 )
             return;
 
         int start = index;
         int end = index + count - 1;
         beginRemoveRows( ROOT_MODEL_INDEX, start, end );
-        length -= count;
+        m_count -= count;
         endRemoveRows();
-        emit countChanged( length );
+        emit countChanged( m_count );
     }
 
 
     void IndicesListModelImpl::insertAt( int index, int count ) {
-        if ( index < 0 || index + count > length + 1 || count < 1 )
+        if ( index < 0 || index + count > m_count + 1 || count < 1 )
             return;
 
         int start = index;
         int end = index + count - 1;
         beginInsertRows( ROOT_MODEL_INDEX, start, end );
-        length += count;
+        m_count += count;
         endInsertRows();
-        emit countChanged( length );
+        emit countChanged( m_count );
     }
 
 
     void IndicesListModelImpl::reset( int count ) {
         beginResetModel();
-        length = count < 0 ? 0 : count;
+        m_count = count < 0 ? 0 : count;
         endResetModel();
-        emit countChanged( length );
+        emit countChanged( m_count );
     }
 
 
     int IndicesListModelImpl::count() const {
-        return length;
+        return m_count;
     }
 
 
     int IndicesListModelImpl::rowCount( const QModelIndex& parent ) const {
         Q_UNUSED( parent )
-        return length;
+        return m_count;
     }
 
 

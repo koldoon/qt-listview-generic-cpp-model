@@ -38,7 +38,7 @@ Window {
 
         Text {
             anchors.verticalCenter: parent.verticalCenter
-            text: "Count: " + provider.itemsModel.length
+            text: "Count: " + provider.itemsModel.count
         }
     }
 

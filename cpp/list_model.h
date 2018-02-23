@@ -43,7 +43,7 @@
 namespace __listmodel {
     class IndicesListModelImpl : public QAbstractListModel {
         Q_OBJECT
-        Q_PROPERTY( int length READ count NOTIFY countChanged )
+        Q_PROPERTY( int count READ count NOTIFY countChanged )
 
     public:
         int count() const;
@@ -72,7 +72,7 @@ namespace __listmodel {
         void countChanged( const int& count );
 
     private:
-        int length = 0;
+        int m_count = 0;
         int a; // alignment
     };
 }
