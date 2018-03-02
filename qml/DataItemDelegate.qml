@@ -1,6 +1,6 @@
 import QtQuick 2.9
 import QtQuick.Controls 2.2
-import App.Provider 1.0    // IMPORTANT! DataItem is declared there.
+import App 1.0    // IMPORTANT! DataItem is declared there.
 
 Row {
     // Typed "item" property.

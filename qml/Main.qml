@@ -2,7 +2,7 @@ import QtQuick 2.9
 import QtQuick.Window 2.3
 import QtQuick.Controls 2.2
 import QtQuick.Layouts 1.3
-import App.Provider 1.0
+import App 1.0
 
 Window {
     visible: true
@@ -32,13 +32,18 @@ Window {
         }
 
         Button {
+            text: "add 3"
+            onClicked: provider.addItems3()
+        }
+
+        Button {
             text: "remove item from center"
             onClicked: provider.removeItem()
         }
 
         Text {
             anchors.verticalCenter: parent.verticalCenter
-            text: "Count: " + provider.itemsModel.count
+            text: "Count: " + provider.itemsModel.length
         }
     }
 

@@ -25,6 +25,7 @@ namespace app {
         explicit Provider( QObject* parent = Q_NULLPTR );
 
         Q_INVOKABLE void addItem();
+        Q_INVOKABLE void addItems3();
         Q_INVOKABLE void removeItem();
 
     Q_SIGNALS:

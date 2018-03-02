@@ -43,10 +43,12 @@
 namespace __listmodel {
     class IndicesListModelImpl : public QAbstractListModel {
         Q_OBJECT
-        Q_PROPERTY( int count READ count NOTIFY countChanged )
+        Q_PROPERTY( int length READ length NOTIFY lengthChanged )
 
     public:
-        int count() const;
+        // Since this class is intendent to be used in JS, we use conventional
+        // to JS lists count/size method and property - length
+        int length() const;
 
         // --- QAbstractListModel ---
         int      rowCount( const QModelIndex& parent ) const override;
@@ -69,10 +71,10 @@ namespace __listmodel {
         void reset( int length = 0 );
 
     Q_SIGNALS:
-        void countChanged( const int& count );
+        void lengthChanged( const int& length );
 
     private:
-        int m_count = 0;
+        int m_length = 0;
         int a; // alignment
     };
 }
@@ -84,6 +86,17 @@ namespace __listmodel {
     template <class ItemType>
     class ListModelImplTemplate : public IndicesListModelImpl {
     public:
+        void removeOne( const QSharedPointer<ItemType>& item ) {
+            const auto index = storage.indexOf( item );
+            if ( index != -1 )
+                removeAt( index );
+        }
+
+        void clear() {
+            storage.clear();
+            IndicesListModelImpl::reset();
+        }
+
         void append( const QSharedPointer<ItemType>& item ) {
             storage.append( item );
             IndicesListModelImpl::push();
@@ -97,17 +110,17 @@ namespace __listmodel {
         void pop( int count ) {
             if ( count <= 0 )
                 return;
-            if ( count > length() )
-                count = length();
+            if ( count > IndicesListModelImpl::length() )
+                count = IndicesListModelImpl::length();
             int countCpy = count;
             for ( ; count > 0; count-- ) {
-                storage.removeAt( storage.length() );
+                storage.removeAt( storage.count() );
             }
             IndicesListModelImpl::pop( countCpy );
         }
 
         void removeAt( int i ) {
-            if ( i > length() )
+            if ( i > IndicesListModelImpl::length() )
                 return;
             storage.removeAt( i );
             IndicesListModelImpl::removeAt( i );
@@ -142,18 +155,14 @@ namespace __listmodel {
 
         // Internal QList storage accessor. It is restricted to change it directly,
         // since we have to proxy all this calls, but it is possible to use it's
-        // iterators and other useful public interfaces.
+        // iterators and other useful public interfaces and const methods.
         const QList<QSharedPointer<ItemType>>& list() const {
             return storage;
         }
 
-        int length() const {
-            return storage.length();
-        }
-
-        // conventional method
-        int count() const {
-            return storage.length();
+        // Qt conventional container size method
+        int count() {
+            return IndicesListModelImpl::length();
         }
 
     protected:

@@ -14,11 +14,20 @@ namespace app {
     }
 
 
+    void Provider::addItems3() {
+        QList<QSharedPointer<DataItem>> source;
+        source << QSharedPointer<DataItem>( new DataItem( m_itemsModel.count() ) )
+               << QSharedPointer<DataItem>( new DataItem( m_itemsModel.count() + 2 ) )
+               << QSharedPointer<DataItem>( new DataItem( m_itemsModel.count() + 3 ) );
+        m_itemsModel << source;
+    }
+
+
     void Provider::removeItem() {
-        if ( m_itemsModel.length() == 0 )
+        if ( m_itemsModel.count() == 0 )
             return;
 
-        int index = m_itemsModel.length() / 2;
+        int index = m_itemsModel.count() / 2;
         m_itemsModel.removeAt( index );
     }
 
