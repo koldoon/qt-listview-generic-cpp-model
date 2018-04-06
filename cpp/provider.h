@@ -19,7 +19,7 @@ namespace app {
         Q_OBJECT
 
         // QML Property of type of generated Model Class
-        Q_PROPERTY( ListModel_DataItem* itemsModel READ itemsModel NOTIFY changed )
+        Q_PROPERTY( ListModel_DataItem* items READ items CONSTANT )
 
     public:
         explicit Provider( QObject* parent = Q_NULLPTR );
@@ -28,13 +28,10 @@ namespace app {
         Q_INVOKABLE void addItems3();
         Q_INVOKABLE void removeItem();
 
-    Q_SIGNALS:
-        void changed();
-
     private:
         // Since this getter is not safe (ownership remains to c++)
         // and it is used for QML only it'd better to make it private.
-        ListModel_DataItem* itemsModel();
-        ListModel_DataItem  m_itemsModel;
+        ListModel_DataItem* items();
+        ListModel_DataItem  m_items;
     };
 }

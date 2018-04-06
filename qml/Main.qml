@@ -43,11 +43,12 @@ Window {
 
         Text {
             anchors.verticalCenter: parent.verticalCenter
-            text: "Count: " + provider.itemsModel.length
+            text: "Count: " + provider.items.length
         }
     }
 
     ListView {
+        id: listView
         anchors.fill: parent
         anchors.topMargin: buttons.implicitHeight + 10
         anchors.bottomMargin: 10
@@ -58,7 +59,7 @@ Window {
         // model of "itemsIndex" provides indices only.
         // also it dispatches all necessary signals
         // that allow view to react on indices changes
-        model: provider.itemsModel
+        model: provider.items.model
 
         delegate: DataItemDelegate {    // delegate must be placed in separate file
             anchors.left: parent.left
@@ -67,7 +68,7 @@ Window {
             // using exposed method "item()" delegate
             // gets data item instance from the collection
             // inside the provider
-            item: provider.itemsModel.item(index)    // "index" can be used only here
+            item: provider.items.item(index)    // "index" can be used only here
         }
     }
 }

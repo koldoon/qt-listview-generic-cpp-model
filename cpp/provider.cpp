@@ -9,30 +9,34 @@ namespace app {
 
 
     void Provider::addItem() {
-        auto item = QSharedPointer<DataItem>( new DataItem( m_itemsModel.count() ) );
-        m_itemsModel << item;
+        auto item = QSharedPointer<DataItem>( new DataItem( m_items.count() ) );
+        m_items << item;
     }
 
 
     void Provider::addItems3() {
         QList<QSharedPointer<DataItem>> source;
-        source << QSharedPointer<DataItem>( new DataItem( m_itemsModel.count() ) )
-               << QSharedPointer<DataItem>( new DataItem( m_itemsModel.count() + 2 ) )
-               << QSharedPointer<DataItem>( new DataItem( m_itemsModel.count() + 3 ) );
-        m_itemsModel << source;
+        source << QSharedPointer<DataItem>( new DataItem( m_items.count() ) )
+               << QSharedPointer<DataItem>( new DataItem( m_items.count() + 2 ) )
+               << QSharedPointer<DataItem>( new DataItem( m_items.count() + 3 ) );
+        m_items << source;
     }
 
 
     void Provider::removeItem() {
-        if ( m_itemsModel.count() == 0 )
+        if ( m_items.count() == 0 )
             return;
 
-        int index = m_itemsModel.count() / 2;
-        m_itemsModel.removeAt( index );
+        for ( auto item : m_items ) {
+            qDebug() << item->value();
+        }
+
+        int index = m_items.count() / 2;
+        m_items.removeAt( index );
     }
 
 
-    ListModel_DataItem* Provider::itemsModel() {
-        return &m_itemsModel;
+    ListModel_DataItem* Provider::items() {
+        return &m_items;
     }
 }

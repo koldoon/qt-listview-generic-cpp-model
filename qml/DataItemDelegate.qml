@@ -6,7 +6,13 @@ Row {
     // Typed "item" property.
     // It is possible to use bi-directional binding with this property
     // since it is declared as a pointer to instance.
+    // : DataItem
     property DataItem item
+    //    property var item: {
+    //        "id": 0,
+    //        "value": 42,
+    //        "doubleId": function() {}
+    //    }
 
     height: implicitHeight
     spacing: 5

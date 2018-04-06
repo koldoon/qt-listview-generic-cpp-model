@@ -46,7 +46,7 @@ namespace __listmodel {
         Q_PROPERTY( int length READ length NOTIFY lengthChanged )
 
     public:
-        // Since this class is intendent to be used in JS, we use conventional
+        // Since this class is intended to be used in JS, we use conventional
         // to JS lists count/size method and property - length
         int length() const;
 
@@ -54,8 +54,8 @@ namespace __listmodel {
         int      rowCount( const QModelIndex& parent ) const override;
         QVariant data( const QModelIndex& index, int role ) const override;
 
-    protected:
         // Create "count" indices and push them to end
+        //        void prePush( int count = 1 );
         void push( int count = 1 );
 
         // Remove "count" indices from the end.
@@ -65,13 +65,14 @@ namespace __listmodel {
         void removeAt( int index, int count = 1 );
 
         // Insert indices at particular place.
+//        void preInsertAt( int index, int count = 1 );
         void insertAt( int index, int count = 1 );
 
         // Reset model with new indices count
         void reset( int length = 0 );
 
     Q_SIGNALS:
-        void lengthChanged( const int& length );
+        void lengthChanged( int length );
 
     private:
         int m_length = 0;
@@ -84,51 +85,51 @@ Q_DECLARE_METATYPE( __listmodel::IndicesListModelImpl* )
 
 namespace __listmodel {
     template <class ItemType>
-    class ListModelImplTemplate : public IndicesListModelImpl {
+    class ListModelImplTemplate : public QObject, public QList<QSharedPointer<ItemType>> {
     public:
         void removeOne( const QSharedPointer<ItemType>& item ) {
-            const auto index = storage.indexOf( item );
+            auto index = QList<ItemType>::indexOf( item );
             if ( index != -1 )
                 removeAt( index );
         }
 
         void clear() {
-            storage.clear();
-            IndicesListModelImpl::reset();
+            QList<ItemType>::clear();
+            m_index.reset();
         }
 
         void append( const QSharedPointer<ItemType>& item ) {
-            storage.append( item );
-            IndicesListModelImpl::push();
+            QList<QSharedPointer<ItemType>>::append( item );
+            m_index.push();
         }
 
         void append( const QList<QSharedPointer<ItemType>>& list ) {
-            storage.append( list );
-            IndicesListModelImpl::push( list.count() );
+            QList<QSharedPointer<ItemType>>::append( list );
+            m_index.push( list.count() );
         }
 
-        void pop( int count ) {
+        void pop( int count = 1 ) {
             if ( count <= 0 )
                 return;
-            if ( count > IndicesListModelImpl::length() )
-                count = IndicesListModelImpl::length();
+            if ( count > m_index.length() )
+                count = m_index.length();
             int countCpy = count;
             for ( ; count > 0; count-- ) {
-                storage.removeAt( storage.count() );
+                QList<ItemType>::removeAt( QList<ItemType>::count() - 1 );
             }
-            IndicesListModelImpl::pop( countCpy );
+            m_index.pop( countCpy );
         }
 
         void removeAt( int i ) {
-            if ( i > IndicesListModelImpl::length() )
+            if ( i > m_index.length() )
                 return;
-            storage.removeAt( i );
-            IndicesListModelImpl::removeAt( i );
+            QList<QSharedPointer<ItemType>>::removeAt( i );
+            m_index.removeAt( i );
         }
 
         void insert( int i, const QSharedPointer<ItemType>& item ) {
-            storage.insert( i, item );
-            IndicesListModelImpl::insertAt( i );
+            QList<ItemType>::insert( i, item );
+            m_index.insertAt( i );
         }
 
         // --- QList-style comfort ;) ---
@@ -153,40 +154,46 @@ namespace __listmodel {
             return *this;
         }
 
-        // Internal QList storage accessor. It is restricted to change it directly,
-        // since we have to proxy all this calls, but it is possible to use it's
-        // iterators and other useful public interfaces and const methods.
-        const QList<QSharedPointer<ItemType>>& list() const {
-            return storage;
-        }
-
-        // Qt conventional container size method
-        int count() {
-            return IndicesListModelImpl::length();
-        }
-
     protected:
-        QList<QSharedPointer<ItemType>> storage;
+        IndicesListModelImpl m_index;
     };
 }
 
 
-#define DECLARE_LIST_MODEL( NAME, ITEM_TYPE )                                        \
-    class NAME : public __listmodel::ListModelImplTemplate<ITEM_TYPE> {              \
-        Q_OBJECT                                                                     \
-                                                                                     \
-    protected:                                                                       \
-        Q_INVOKABLE ITEM_TYPE* item( int i, bool keepOwnership = true ) const {      \
-            if ( i >= 0 && i < storage.length() && storage.length() > 0 ) {          \
-                auto obj = storage[i].data();                                        \
-                if ( keepOwnership )                                                 \
-                    QQmlEngine::setObjectOwnership( obj, QQmlEngine::CppOwnership ); \
-                return obj;                                                          \
-            }                                                                        \
-            else {                                                                   \
-                return Q_NULLPTR;                                                    \
-            }                                                                        \
-        }                                                                            \
-    };                                                                               \
-                                                                                     \
+#define DECLARE_LIST_MODEL( NAME, ITEM_TYPE )                                                          \
+    class NAME : public __listmodel::ListModelImplTemplate<ITEM_TYPE> {                                \
+        Q_OBJECT                                                                                       \
+        Q_PROPERTY( __listmodel::IndicesListModelImpl* model READ model CONSTANT )                     \
+        Q_PROPERTY( int length READ length NOTIFY lengthChanged )                                      \
+                                                                                                       \
+    public:                                                                                            \
+        NAME() {                                                                                       \
+            connect( &m_index, SIGNAL( lengthChanged( int ) ), this, SIGNAL( lengthChanged( int ) ) ); \
+        }                                                                                              \
+                                                                                                       \
+    protected:                                                                                         \
+        __listmodel::IndicesListModelImpl* model() {                                                   \
+            return &m_index;                                                                           \
+        }                                                                                              \
+                                                                                                       \
+        int length() const {                                                                           \
+            return m_index.length();                                                                   \
+        }                                                                                              \
+                                                                                                       \
+        Q_INVOKABLE ITEM_TYPE* item( int i, bool keepOwnership = true ) const {                        \
+            if ( i >= 0 && i < length() && length() > 0 ) {                                            \
+                auto obj = at( i ).data();                                                             \
+                if ( keepOwnership )                                                                   \
+                    QQmlEngine::setObjectOwnership( obj, QQmlEngine::CppOwnership );                   \
+                return obj;                                                                            \
+            }                                                                                          \
+            else {                                                                                     \
+                return Q_NULLPTR;                                                                      \
+            }                                                                                          \
+        }                                                                                              \
+                                                                                                       \
+    Q_SIGNALS:                                                                                         \
+        void lengthChanged( int length );                                                              \
+    };                                                                                                 \
+                                                                                                       \
     Q_DECLARE_METATYPE( NAME* )
