@@ -1,199 +1,134 @@
 #pragma once
 
-//
-// DECLARE_LIST_MODEL( NAME, ITEM_TYPE )
-// --------------------------
-// Since it is impossible to create generic template class using Q_OBJECT,
-// because MOC doesn't support such option, this macro generates
-// ItemModel class suitable for using as data model for any QML ListView component
-// with the following structure:
-//
-//  class NAME
-//      + void push( const QSharedPointer<ITEM_TYPE>& item )
-//      + void removeAt( int i )
-//      + void insert( int i, const QSharedPointer<ITEM_TYPE>& item )
-//      + int length() const
-//      + const QList<QSharedPointer<ITEM_TYPE>>& list() const  // internal storage accessor
-//      # Q_INVOKABLE ITEM_TYPE* item( int i, bool keepOwnership ) const   // QML Invokable
-//
-// Basically, it provides indices and changes signals to view,
-// plus QList-like interface to feed and change internal storage (QList<QSharedPointer>).
-// Typed item element can be get by "item()" method inside the delegate by index.
-// To be able to use this model as QML Property Type, you MUST register
-// this types as follows:
-//
-// TYPE must be QObject: class TYPE : public QObject { }
-// Immediately after the TYPE class declaration:
-//
-//      Q_DECLARE_METATYPE( TYPE* )
-//
-// Inside void main() OR void QQmlExtensionPlugin::registerTypes():
-//
-//      qmlRegisterUncreatableType<ListModel_TYPE>( ... );
-//      qmlRegisterUncreatableType<TYPE>( ... );
-//
-
+#include "data_item.h"
 #include <QAbstractListModel>
-#include <QList>
-#include <QObject>
-#include <QQmlEngine>
-#include <QSharedPointer>
 
-// private namespace with internal implementation
-namespace __listmodel {
-    class IndicesListModelImpl : public QAbstractListModel {
+namespace __qobjectsqmllist {
+    // role name to be used in delegates for list items
+    static const char ITEM_ROLE_NAME[] = "modelData";
+
+    // instantiating optimization.
+    // since we don't need actual model index when we work with
+    // flat list, we can instantiate it just once and use everywhere
+    static const QModelIndex ROOT_MODEL_INDEX;
+
+    class QObjectsQmlListBase : public QAbstractListModel {
         Q_OBJECT
-        Q_PROPERTY( int length READ length NOTIFY lengthChanged )
-
-    public:
-        // Since this class is intended to be used in JS, we use conventional
-        // to JS lists count/size method and property - length
-        int length() const;
-
-        // --- QAbstractListModel ---
-        int      rowCount( const QModelIndex& parent ) const override;
-        QVariant data( const QModelIndex& index, int role ) const override;
-
-        // Create "count" indices and push them to end
-        //        void prePush( int count = 1 );
-        void push( int count = 1 );
-
-        // Remove "count" indices from the end.
-        void pop( int count = 1 );
-
-        // Remove indices at particular place.
-        void removeAt( int index, int count = 1 );
-
-        // Insert indices at particular place.
-//        void preInsertAt( int index, int count = 1 );
-        void insertAt( int index, int count = 1 );
-
-        // Reset model with new indices count
-        void reset( int length = 0 );
+        Q_PROPERTY( int length MEMBER m_length NOTIFY lengthChanged )
 
     Q_SIGNALS:
-        void lengthChanged( int length );
+        void lengthChanged();
+
+    protected:
+        void setLength( int value ) {
+            m_length = value;
+            emit lengthChanged();
+        }
 
     private:
         int m_length = 0;
-        int a; // alignment
-    };
-}
-
-Q_DECLARE_METATYPE( __listmodel::IndicesListModelImpl* )
-
-
-namespace __listmodel {
-    template <class ItemType>
-    class ListModelImplTemplate : public QObject, public QList<QSharedPointer<ItemType>> {
-    public:
-        void removeOne( const QSharedPointer<ItemType>& item ) {
-            auto index = QList<ItemType>::indexOf( item );
-            if ( index != -1 )
-                removeAt( index );
-        }
-
-        void clear() {
-            QList<ItemType>::clear();
-            m_index.reset();
-        }
-
-        void append( const QSharedPointer<ItemType>& item ) {
-            QList<QSharedPointer<ItemType>>::append( item );
-            m_index.push();
-        }
-
-        void append( const QList<QSharedPointer<ItemType>>& list ) {
-            QList<QSharedPointer<ItemType>>::append( list );
-            m_index.push( list.count() );
-        }
-
-        void pop( int count = 1 ) {
-            if ( count <= 0 )
-                return;
-            if ( count > m_index.length() )
-                count = m_index.length();
-            int countCpy = count;
-            for ( ; count > 0; count-- ) {
-                QList<ItemType>::removeAt( QList<ItemType>::count() - 1 );
-            }
-            m_index.pop( countCpy );
-        }
-
-        void removeAt( int i ) {
-            if ( i > m_index.length() )
-                return;
-            QList<QSharedPointer<ItemType>>::removeAt( i );
-            m_index.removeAt( i );
-        }
-
-        void insert( int i, const QSharedPointer<ItemType>& item ) {
-            QList<ItemType>::insert( i, item );
-            m_index.insertAt( i );
-        }
-
-        // --- QList-style comfort ;) ---
-
-        ListModelImplTemplate& operator+=( const QSharedPointer<ItemType>& t ) {
-            append( t );
-            return *this;
-        }
-
-        ListModelImplTemplate& operator<<( const QSharedPointer<ItemType>& t ) {
-            append( t );
-            return *this;
-        }
-
-        ListModelImplTemplate& operator+=( const QList<QSharedPointer<ItemType>>& list ) {
-            append( list );
-            return *this;
-        }
-
-        ListModelImplTemplate& operator<<( const QList<QSharedPointer<ItemType>>& list ) {
-            append( list );
-            return *this;
-        }
-
-    protected:
-        IndicesListModelImpl m_index;
     };
 }
 
 
-#define DECLARE_LIST_MODEL( NAME, ITEM_TYPE )                                                          \
-    class NAME : public __listmodel::ListModelImplTemplate<ITEM_TYPE> {                                \
-        Q_OBJECT                                                                                       \
-        Q_PROPERTY( __listmodel::IndicesListModelImpl* model READ model CONSTANT )                     \
-        Q_PROPERTY( int length READ length NOTIFY lengthChanged )                                      \
-                                                                                                       \
-    public:                                                                                            \
-        NAME() {                                                                                       \
-            connect( &m_index, SIGNAL( lengthChanged( int ) ), this, SIGNAL( lengthChanged( int ) ) ); \
-        }                                                                                              \
-                                                                                                       \
-    protected:                                                                                         \
-        __listmodel::IndicesListModelImpl* model() {                                                   \
-            return &m_index;                                                                           \
-        }                                                                                              \
-                                                                                                       \
-        int length() const {                                                                           \
-            return m_index.length();                                                                   \
-        }                                                                                              \
-                                                                                                       \
-        Q_INVOKABLE ITEM_TYPE* item( int i, bool keepOwnership = true ) const {                        \
-            if ( i >= 0 && i < length() && length() > 0 ) {                                            \
-                auto obj = at( i ).data();                                                             \
-                if ( keepOwnership )                                                                   \
-                    QQmlEngine::setObjectOwnership( obj, QQmlEngine::CppOwnership );                   \
-                return obj;                                                                            \
-            }                                                                                          \
-            else {                                                                                     \
-                return Q_NULLPTR;                                                                      \
-            }                                                                                          \
-        }                                                                                              \
-                                                                                                       \
-    Q_SIGNALS:                                                                                         \
-        void lengthChanged( int length );                                                              \
-    };                                                                                                 \
-                                                                                                       \
-    Q_DECLARE_METATYPE( NAME* )
+template <typename T>
+class QObjectsQmlList : public QList<QSharedPointer<T>>, public __qobjectsqmllist::QObjectsQmlListBase {
+    using ITEM = QSharedPointer<T>;
+    using LIST = QList<ITEM>;
+
+public:
+    enum CollectionRole {
+        ItemRole = Qt::UserRole
+    };
+
+    int rowCount( const QModelIndex& parent ) const override {
+        Q_UNUSED( parent )
+        return LIST::count();
+    }
+
+    QVariant data( const QModelIndex& index, int role ) const override {
+        auto row = index.row();
+
+        if ( row < 0 || row >= LIST::count() )
+            return QVariant();
+
+        if ( role == ItemRole )
+            return QVariant::fromValue<QObject*>( LIST::at( row ).data() );
+
+        return QVariant();
+    }
+
+    QHash<int, QByteArray> roleNames() const override {
+        auto roles = QAbstractListModel::roleNames();
+        roles[ItemRole] = __qobjectsqmllist::ITEM_ROLE_NAME;
+        return roles;
+    };
+
+
+    void insert( int i, const ITEM& item ) {
+        if ( i < 0 || i > LIST::count() )
+            return;
+
+        beginInsertRows( __qobjectsqmllist::ROOT_MODEL_INDEX, i, i );
+        LIST::insert( i, item );
+        endInsertRows();
+        setLength( LIST::count() );
+    }
+
+    void append( const ITEM& item ) {
+        auto i = LIST::count();
+        beginInsertRows( __qobjectsqmllist::ROOT_MODEL_INDEX, i, i );
+        LIST::append( item );
+        endInsertRows();
+        setLength( LIST::count() );
+    }
+
+    void append( const LIST& list ) {
+        if ( list.count() == 0 )
+            return;
+
+        auto start = LIST::count();
+        auto end = LIST::count() + list.count() - 1;
+        beginInsertRows( __qobjectsqmllist::ROOT_MODEL_INDEX, start, end );
+        LIST::append( list );
+        endInsertRows();
+        setLength( LIST::count() );
+    }
+
+    void removeAt( int i ) {
+        if ( i < 0 || i > LIST::count() - 1 )
+            return;
+
+        beginRemoveRows( __qobjectsqmllist::ROOT_MODEL_INDEX, i, i );
+        LIST::removeAt( i );
+        endRemoveRows();
+        setLength( LIST::count() );
+    }
+
+    void replace( int i, const ITEM& item ) {
+        removeAt( i );
+        insert( i, item );
+    }
+
+    // --- QList-style comfort ;) ---
+
+    QObjectsQmlList& operator+=( const ITEM& t ) {
+        append( t );
+        return *this;
+    }
+
+    QObjectsQmlList& operator<<( const ITEM& t ) {
+        append( t );
+        return *this;
+    }
+
+    QObjectsQmlList& operator+=( const LIST& list ) {
+        append( list );
+        return *this;
+    }
+
+    QObjectsQmlList& operator<<( const LIST& list ) {
+        append( list );
+        return *this;
+    }
+};

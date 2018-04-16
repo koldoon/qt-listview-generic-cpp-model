@@ -22,21 +22,25 @@ namespace app {
         m_items << source;
     }
 
+    void Provider::changeItem() {
+        if ( m_items.count() == 0 )
+            return;
+
+        int index = m_items.count() / 2;
+        m_items.replace( index, QSharedPointer<DataItem>( new DataItem( 111, "Changed Item" ) ) );
+    }
+
 
     void Provider::removeItem() {
         if ( m_items.count() == 0 )
             return;
-
-        for ( auto item : m_items ) {
-            qDebug() << item->value();
-        }
 
         int index = m_items.count() / 2;
         m_items.removeAt( index );
     }
 
 
-    ListModel_DataItem* Provider::items() {
+    QObjectsQmlList<app::DataItem>* Provider::items() {
         return &m_items;
     }
 }

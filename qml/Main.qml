@@ -6,10 +6,9 @@ import App 1.0
 
 Window {
     visible: true
-    width: 500
+    width: 600
     height: 500
     title: qsTr("c++ generic list model example")
-
 
     Provider {
         id: provider
@@ -37,7 +36,12 @@ Window {
         }
 
         Button {
-            text: "remove item from center"
+            text: "change center"
+            onClicked: provider.changeItem()
+        }
+
+        Button {
+            text: "remove center"
             onClicked: provider.removeItem()
         }
 
@@ -52,23 +56,18 @@ Window {
         anchors.fill: parent
         anchors.topMargin: buttons.implicitHeight + 10
         anchors.bottomMargin: 10
-        boundsBehavior: Flickable.StopAtBounds
+        boundsBehavior: Flickable.DragOverBounds
         clip: true
         cacheBuffer: 2
 
         // model of "itemsIndex" provides indices only.
         // also it dispatches all necessary signals
         // that allow view to react on indices changes
-        model: provider.items.model
+        model: provider.items
 
         delegate: DataItemDelegate {    // delegate must be placed in separate file
             anchors.left: parent.left
             anchors.right: parent.right
-
-            // using exposed method "item()" delegate
-            // gets data item instance from the collection
-            // inside the provider
-            item: provider.items.item(index)    // "index" can be used only here
         }
     }
 }

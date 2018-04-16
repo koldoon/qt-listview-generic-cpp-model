@@ -6,20 +6,18 @@ Row {
     // Typed "item" property.
     // It is possible to use bi-directional binding with this property
     // since it is declared as a pointer to instance.
-    // : DataItem
-    property DataItem item
-    //    property var item: {
-    //        "id": 0,
-    //        "value": 42,
-    //        "doubleId": function() {}
-    //    }
+//    property var modelData: {
+//        "id": 2,
+//        "value": 42,
+//        "doubleId": function() { console.log("id doubled") }
+//    }
 
     height: implicitHeight
     spacing: 5
     padding: 5
 
     Text {
-        text: item.id
+        text: modelData.id
         width: 50
         padding: 10
     }
@@ -34,8 +32,8 @@ Row {
             id: input
             anchors.fill: parent
             padding: 10
-            text: item.value                    // Using structure properties
-            onTextChanged: item.value = text    // Changing structure properties
+            text: modelData.value                    // Using structure properties
+            onTextChanged: modelData.value = text    // Changing structure properties
         }
     }
 
@@ -49,6 +47,6 @@ Row {
         anchors.verticalCenter: parent.verticalCenter
         height: input.implicitHeight
         text: "double id"
-        onClicked: item.doubleId()      // Executing business logic
+        onClicked: modelData.doubleId()      // Executing business logic
     }
 }

@@ -15,7 +15,6 @@ set(SOURCE_FILES
     cpp/data_item.cpp
     cpp/provider.cpp
     cpp/provider.h
-    cpp/list_model.cpp
     cpp/list_model.h)
 
 add_executable(${PROJECT_NAME} ${SOURCE_FILES})
