@@ -45,6 +45,15 @@ namespace __qobjectsqmllist {
  *      Q_PROPERTY( QObjectList<app::DataItem>* items READ items CONSTANT )
  * 4) Use this property as simple QList<QSharedObject<app::DataItem>>
  *
+ * In QML ListView delegate the ROLE "modelData" will be available to get access to list item.
+ * Since this role is conventional when using ListView with JS arrays, it is very handy
+ * to use JS arrays as mock data providers during view prototyping.
+ *
+ * NOTE: Not all QList methods are usable to get this thing work. Please refer to this class source
+ * and feel free to implement the rest methods.
+ * Also, since QList doesn't have that methods marked as "virtual"
+ * it is impossible to use this class with pointer to QList<>*.
+ *
  * @author Vadim Usoltsev
  */
 template <typename T>
@@ -54,7 +63,7 @@ class QObjectListModel : public QList<QSharedPointer<T>>, public __qobjectsqmlli
 
 public:
     enum CollectionRole {
-        ItemRole = Qt::UserRole
+        ItemDataRole = Qt::UserRole
     };
 
     int rowCount( const QModelIndex& parent ) const override {
@@ -68,7 +77,7 @@ public:
         if ( row < 0 || row >= LIST::count() )
             return QVariant();
 
-        if ( role == ItemRole )
+        if ( role == ItemDataRole )
             return QVariant::fromValue<QObject*>( LIST::at( row ).data() );
 
         return QVariant();
@@ -76,7 +85,7 @@ public:
 
     QHash<int, QByteArray> roleNames() const override {
         auto roles = QAbstractListModel::roleNames();
-        roles[ItemRole] = __qobjectsqmllist::ITEM_ROLE_NAME;
+        roles[ItemDataRole] = __qobjectsqmllist::ITEM_ROLE_NAME;
         return roles;
     };
 
