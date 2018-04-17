@@ -69,5 +69,9 @@ Window {
             anchors.left: parent.left
             anchors.right: parent.right
         }
+
+        removeDisplaced: Transition {
+            NumberAnimation { properties: "x,y"; duration: 100; easing.type: Easing.InOutQuad }
+        }
     }
 }

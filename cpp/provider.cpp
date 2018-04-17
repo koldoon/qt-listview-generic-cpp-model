@@ -40,7 +40,7 @@ namespace app {
     }
 
 
-    QObjectList<app::DataItem>* Provider::items() {
+    QObjectListModel<app::DataItem>* Provider::items() {
         return &m_items;
     }
 }

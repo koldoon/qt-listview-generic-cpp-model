@@ -12,7 +12,7 @@ namespace __qobjectsqmllist {
     // flat list, we can instantiate it just once and use everywhere
     static const QModelIndex ROOT_MODEL_INDEX;
 
-    class QObjectListBase : public QAbstractListModel {
+    class QObjectListModelBase : public QAbstractListModel {
         Q_OBJECT
         Q_PROPERTY( int length MEMBER m_length NOTIFY lengthChanged )
 
@@ -48,7 +48,7 @@ namespace __qobjectsqmllist {
  * @author Vadim Usoltsev
  */
 template <typename T>
-class QObjectList : public QList<QSharedPointer<T>>, public __qobjectsqmllist::QObjectListBase {
+class QObjectListModel : public QList<QSharedPointer<T>>, public __qobjectsqmllist::QObjectListModelBase {
     using ITEM = QSharedPointer<T>;
     using LIST = QList<ITEM>;
 
@@ -128,22 +128,22 @@ public:
 
     // --- QList-style comfort ;) ---
 
-    QObjectList& operator+=( const ITEM& t ) {
+    QObjectListModel& operator+=( const ITEM& t ) {
         append( t );
         return *this;
     }
 
-    QObjectList& operator<<( const ITEM& t ) {
+    QObjectListModel& operator<<( const ITEM& t ) {
         append( t );
         return *this;
     }
 
-    QObjectList& operator+=( const LIST& list ) {
+    QObjectListModel& operator+=( const LIST& list ) {
         append( list );
         return *this;
     }
 
-    QObjectList& operator<<( const LIST& list ) {
+    QObjectListModel& operator<<( const LIST& list ) {
         append( list );
         return *this;
     }
