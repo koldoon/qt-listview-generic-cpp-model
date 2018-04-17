@@ -15,7 +15,7 @@ set(SOURCE_FILES
     cpp/data_item.cpp
     cpp/provider.cpp
     cpp/provider.h
-    cpp/list_model.h)
+    cpp/qobject_list.h)
 
 add_executable(${PROJECT_NAME} ${SOURCE_FILES})
 target_link_libraries(${PROJECT_NAME} Qt5::Core Qt5::Quick)

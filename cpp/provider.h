@@ -1,7 +1,7 @@
 #pragma once
 
 #include "data_item.h"
-#include "list_model.h"
+#include "qobject_list.h"
 #include <QList>
 #include <QObject>
 #include <QSharedPointer>
@@ -16,7 +16,7 @@ namespace app {
         Q_OBJECT
 
         // QML Property of type of generated Model Class
-        Q_PROPERTY( QObjectsQmlList<app::DataItem>* items READ items CONSTANT )
+        Q_PROPERTY( QObjectList<app::DataItem>* items READ items CONSTANT )
 
     public:
         explicit Provider( QObject* parent = Q_NULLPTR );
@@ -29,7 +29,7 @@ namespace app {
     private:
         // Since this getter is not safe (ownership remains to c++)
         // and it is used for QML only it'd better to make it private.
-        QObjectsQmlList<app::DataItem>* items();
-        QObjectsQmlList<app::DataItem>  m_items;
+        QObjectList<app::DataItem>* items();
+        QObjectList<app::DataItem>  m_items;
     };
 }

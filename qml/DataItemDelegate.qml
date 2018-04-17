@@ -3,14 +3,14 @@ import QtQuick.Controls 2.2
 import App 1.0    // IMPORTANT! DataItem is declared there.
 
 Row {
-    // Typed "item" property.
+    // Typed "modelData" property.
     // It is possible to use bi-directional binding with this property
     // since it is declared as a pointer to instance.
-//    property var modelData: {
-//        "id": 2,
-//        "value": 42,
-//        "doubleId": function() { console.log("id doubled") }
-//    }
+    //    property var modelData: {
+    //        "id": 2,
+    //        "value": 42,
+    //        "doubleId": function() { console.log("id doubled") }
+    //    }
 
     height: implicitHeight
     spacing: 5
@@ -35,12 +35,6 @@ Row {
             text: modelData.value                    // Using structure properties
             onTextChanged: modelData.value = text    // Changing structure properties
         }
-    }
-
-    Text {
-        text: "<- Change Me"
-        opacity: 0.5
-        anchors.verticalCenter: parent.verticalCenter
     }
 
     Button {

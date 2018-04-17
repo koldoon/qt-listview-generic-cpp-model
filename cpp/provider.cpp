@@ -17,8 +17,8 @@ namespace app {
     void Provider::addItems3() {
         QList<QSharedPointer<DataItem>> source;
         source << QSharedPointer<DataItem>( new DataItem( m_items.count() ) )
-               << QSharedPointer<DataItem>( new DataItem( m_items.count() + 2 ) )
-               << QSharedPointer<DataItem>( new DataItem( m_items.count() + 3 ) );
+               << QSharedPointer<DataItem>( new DataItem( m_items.count() + 1 ) )
+               << QSharedPointer<DataItem>( new DataItem( m_items.count() + 2 ) );
         m_items << source;
     }
 
@@ -40,7 +40,7 @@ namespace app {
     }
 
 
-    QObjectsQmlList<app::DataItem>* Provider::items() {
+    QObjectList<app::DataItem>* Provider::items() {
         return &m_items;
     }
 }

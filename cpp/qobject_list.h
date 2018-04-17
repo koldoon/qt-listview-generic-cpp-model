@@ -12,11 +12,11 @@ namespace __qobjectsqmllist {
     // flat list, we can instantiate it just once and use everywhere
     static const QModelIndex ROOT_MODEL_INDEX;
 
-    class QObjectsQmlListBase : public QAbstractListModel {
+    class QObjectListBase : public QAbstractListModel {
         Q_OBJECT
         Q_PROPERTY( int length MEMBER m_length NOTIFY lengthChanged )
 
-    Q_SIGNALS:
+    signals:
         void lengthChanged();
 
     protected:
@@ -31,8 +31,24 @@ namespace __qobjectsqmllist {
 }
 
 
+/*
+ * QML ListView generic c++ model for collection of QObject-s.
+ * Usage:
+ * 1) Declare pointers to the contained class and to instantiated container itself:
+ *    For some app::DataType it looks like
+ *      Q_DECLARE_METATYPE( app::DataItem* )
+ *      Q_DECLARE_METATYPE( QObjectList<app::DataItem>* )
+ * 2) Register types in Qt Meta-system:
+ *      qmlRegisterUncreatableType<app::DataItem>( "App", 1, 0, "DataItem", "interface" );
+ *      qmlRegisterUncreatableType<QObjectList<app::DataItem>>( "App", 1, 0, "DataItemList", "interface" );
+ * 3) Define and implement Q_PROPERTY:
+ *      Q_PROPERTY( QObjectList<app::DataItem>* items READ items CONSTANT )
+ * 4) Use this property as simple QList<QSharedObject<app::DataItem>>
+ *
+ * @author Vadim Usoltsev
+ */
 template <typename T>
-class QObjectsQmlList : public QList<QSharedPointer<T>>, public __qobjectsqmllist::QObjectsQmlListBase {
+class QObjectList : public QList<QSharedPointer<T>>, public __qobjectsqmllist::QObjectListBase {
     using ITEM = QSharedPointer<T>;
     using LIST = QList<ITEM>;
 
@@ -112,22 +128,22 @@ public:
 
     // --- QList-style comfort ;) ---
 
-    QObjectsQmlList& operator+=( const ITEM& t ) {
+    QObjectList& operator+=( const ITEM& t ) {
         append( t );
         return *this;
     }
 
-    QObjectsQmlList& operator<<( const ITEM& t ) {
+    QObjectList& operator<<( const ITEM& t ) {
         append( t );
         return *this;
     }
 
-    QObjectsQmlList& operator+=( const LIST& list ) {
+    QObjectList& operator+=( const LIST& list ) {
         append( list );
         return *this;
     }
 
-    QObjectsQmlList& operator<<( const LIST& list ) {
+    QObjectList& operator<<( const LIST& list ) {
         append( list );
         return *this;
     }

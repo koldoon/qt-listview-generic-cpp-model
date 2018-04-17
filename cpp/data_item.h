@@ -3,7 +3,7 @@
 #include <QDebug>
 #include <QObject>
 #include <QString>
-#include "list_model.h"
+#include "qobject_list.h"
 
 namespace app {
     // Some sort of data structure as a collection element
@@ -35,4 +35,4 @@ namespace app {
 
 // IMPORTANT to declare type as pointer here (with * at the end)
 Q_DECLARE_METATYPE( app::DataItem* )
-Q_DECLARE_METATYPE( QObjectsQmlList<app::DataItem>* )
+Q_DECLARE_METATYPE( QObjectList<app::DataItem>* )
