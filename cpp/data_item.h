@@ -1,9 +1,9 @@
 #pragma once
 
+#include "qobject_list_model.h"
 #include <QDebug>
 #include <QObject>
 #include <QString>
-#include "qobject_list_model.h"
 
 namespace app {
     // Some sort of data structure as a collection element
@@ -32,7 +32,3 @@ namespace app {
         QString m_value;
     };
 }
-
-// IMPORTANT to declare type as pointer here (with * at the end)
-Q_DECLARE_METATYPE( app::DataItem* )
-Q_DECLARE_METATYPE( QObjectListModel<app::DataItem>* )

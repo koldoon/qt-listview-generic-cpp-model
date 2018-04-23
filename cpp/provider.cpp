@@ -40,7 +40,12 @@ namespace app {
     }
 
 
-    QObjectListModel<app::DataItem>* Provider::items() {
+    QObjectListModel_DataItem* Provider::items() {
         return &m_items;
+    }
+
+
+    QObjectListModel_DataItem2* Provider::items2() {
+        return &m_items2;
     }
 }

@@ -1,6 +1,7 @@
 #include <QDebug>
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
+#include <cpp/data_item_2.h>
 #include <cpp/provider.h>
 
 int main( int argc, char* argv[] ) {
@@ -9,9 +10,11 @@ int main( int argc, char* argv[] ) {
 
     // These types are NOT supposed to be created in QML
     // for example, as ListDataModel { } or DataItem { }
-    //    qmlRegisterUncreatableType<ListModel_DataItem>( "App", 1, 0, "ListModel_DataItem", "interface" );
+
     qmlRegisterUncreatableType<app::DataItem>( "App", 1, 0, "DataItem", "interface" );
-    qmlRegisterUncreatableType<QObjectListModel<app::DataItem>>( "App", 1, 0, "DataItemsCollection", "interface" );
+    qmlRegisterUncreatableType<app::DataItem2>( "App", 1, 0, "DataItem2", "interface" );
+    qmlRegisterUncreatableType<app::QObjectListModel_DataItem>( "App", 1, 0, "ListModel_DataItem", "interface" );
+    qmlRegisterUncreatableType<app::QObjectListModel_DataItem2>( "App", 1, 0, "ListModel_DataItem2", "interface" );
 
     qmlRegisterType<app::Provider>( "App", 1, 0, "Provider" );
 
