@@ -185,7 +185,7 @@ namespace __qobjectsqmllist {
             emit emitChanged();                                                            \
         }                                                                                  \
                                                                                            \
-        void emitChanged() {                                                               \
+        virtual void emitChanged() {                                                       \
             emit changed();                                                                \
         }                                                                                  \
                                                                                            \
