@@ -1,7 +1,8 @@
 #pragma once
 
-#include "data_item.h"
 #include <QAbstractListModel>
+#include <QQmlEngine>
+#include <QVariant>
 
 namespace __qobjectsqmllist {
     // role name to be used in delegates for list items
@@ -13,7 +14,7 @@ namespace __qobjectsqmllist {
     static const QModelIndex ROOT_MODEL_INDEX;
 
     template <typename T>
-    class QObjectListModelBase : public QList<QSharedPointer<T>>, public QAbstractListModel {
+    class QObjectListModelBase : public QAbstractListModel, public QList<QSharedPointer<T>> {
         using ITEM = QSharedPointer<T>;
         using LIST = QList<ITEM>;
 
@@ -151,12 +152,15 @@ namespace __qobjectsqmllist {
 /*
  * QML ListView generic c++ model for collection of QObject-s.
  * Usage:
- * 1) Register types in Qt Meta-system:
+ * 1) Declare new List Model:
+ *      DECLARE_Q_OBJECT_LIST_MODEL( app::DataItem )
+ * 2) Register types in Qt Meta-system:
  *      qmlRegisterUncreatableType<app::DataItem>( "App", 1, 0, "DataItem", "interface" );
- *      qmlRegisterUncreatableType<QObjectList<app::DataItem>>( "App", 1, 0, "DataItemList", "interface" );
- * 2) Define and implement Q_PROPERTY:
+ *      qmlRegisterUncreatableType<app::QObjectList_DataItem>( "App", 1, 0, "DataItemList", "interface" );
+ * 3) Define and implement Q_PROPERTY:
  *      Q_PROPERTY( QObjectList<app::DataItem>* items READ items CONSTANT )
- * 3) Use this property as simple QList<QSharedObject<app::DataItem>>
+ * 4) Use this property as simple QList<QSharedObject<app::DataItem>>
+ * 5) Use "modelData" conventional injected property to get access to list item data in ListView Delegates.
  *
  * In QML ListView delegate the ROLE "modelData" will be available to get access to list item.
  * Since this role is conventional when using ListView with JS arrays, it is very handy
@@ -169,7 +173,7 @@ namespace __qobjectsqmllist {
  *
  * @author Vadim Usoltsev
  */
-#define DECLARE_QOBJECTLISTMODEL( TYPE )                                                   \
+#define DECLARE_Q_OBJECT_LIST_MODEL( TYPE )                                                \
     class QObjectListModel_##TYPE : public __qobjectsqmllist::QObjectListModelBase<TYPE> { \
         Q_OBJECT                                                                           \
         Q_PROPERTY( int length MEMBER m_length NOTIFY lengthChanged )                      \
@@ -187,6 +191,14 @@ namespace __qobjectsqmllist {
                                                                                            \
         virtual void emitChanged() {                                                       \
             emit changed();                                                                \
+        }                                                                                  \
+                                                                                           \
+        Q_INVOKABLE QVariant item( int i ) {                                               \
+            if ( i < 0 || i >= count() )                                                   \
+                return QVariant();                                                         \
+            auto obj = at( i ).data();                                                     \
+            QQmlEngine::setObjectOwnership( obj, QQmlEngine::CppOwnership );               \
+            return QVariant::fromValue( obj );                                             \
         }                                                                                  \
                                                                                            \
     private:                                                                               \

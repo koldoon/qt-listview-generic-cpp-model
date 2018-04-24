@@ -12,6 +12,8 @@ Row {
     //        "doubleId": function() { console.log("id doubled") }
     //    }
 
+    property var d
+
     height: implicitHeight
     spacing: 5
     padding: 5

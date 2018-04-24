@@ -65,7 +65,8 @@ Window {
         // that allow view to react on indices changes
         model: provider.items
 
-        delegate: DataItemDelegate {    // delegate must be placed in separate file
+        delegate: DataItemDelegate {
+            d: provider.items.item(index)
             anchors.left: parent.left
             anchors.right: parent.right
         }

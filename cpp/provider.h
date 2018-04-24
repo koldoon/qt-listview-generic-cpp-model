@@ -11,8 +11,8 @@
 // list model within namespaces
 namespace app {
 
-    DECLARE_QOBJECTLISTMODEL( DataItem )
-    DECLARE_QOBJECTLISTMODEL( DataItem2 )
+    DECLARE_Q_OBJECT_LIST_MODEL( DataItem )
+    DECLARE_Q_OBJECT_LIST_MODEL( DataItem2 )
 
     // Provider is an example of class with some business logic that
     // needs to expose some collection of items of class DataItem
