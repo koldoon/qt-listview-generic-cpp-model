@@ -54,7 +54,7 @@ namespace __qobjectsqmllist {
             beginInsertRows( __qobjectsqmllist::ROOT_MODEL_INDEX, i, i );
             LIST::insert( i, item );
             endInsertRows();
-            setLength( LIST::count() );
+            emitChanged();
         }
 
         void append( const ITEM& item ) {
@@ -62,7 +62,7 @@ namespace __qobjectsqmllist {
             beginInsertRows( __qobjectsqmllist::ROOT_MODEL_INDEX, i, i );
             LIST::append( item );
             endInsertRows();
-            setLength( LIST::count() );
+            emitChanged();
         }
 
         void append( const LIST& list ) {
@@ -74,7 +74,7 @@ namespace __qobjectsqmllist {
             beginInsertRows( __qobjectsqmllist::ROOT_MODEL_INDEX, start, end );
             LIST::append( list );
             endInsertRows();
-            setLength( LIST::count() );
+            emitChanged();
         }
 
         void removeAt( int i ) {
@@ -84,7 +84,16 @@ namespace __qobjectsqmllist {
             beginRemoveRows( __qobjectsqmllist::ROOT_MODEL_INDEX, i, i );
             LIST::removeAt( i );
             endRemoveRows();
-            setLength( LIST::count() );
+            emitChanged();
+        }
+
+        bool removeOne( const ITEM& item ) {
+            int index = LIST::indexOf( item );
+            if ( index != -1 ) {
+                removeAt( index );
+                return true;
+            }
+            return false;
         }
 
         void removeLast() {
@@ -95,7 +104,7 @@ namespace __qobjectsqmllist {
             beginRemoveRows( __qobjectsqmllist::ROOT_MODEL_INDEX, i, i );
             LIST::removeAt( i );
             endRemoveRows();
-            setLength( LIST::count() );
+            emitChanged();
         }
 
         void removeFirst() {
@@ -105,7 +114,7 @@ namespace __qobjectsqmllist {
             beginRemoveRows( __qobjectsqmllist::ROOT_MODEL_INDEX, 0, 0 );
             LIST::removeAt( 0 );
             endRemoveRows();
-            setLength( LIST::count() );
+            emitChanged();
         }
 
         void replace( int i, const ITEM& item ) {
@@ -118,7 +127,7 @@ namespace __qobjectsqmllist {
             beginResetModel();
             LIST::clear();
             endResetModel();
-            setLength( LIST::count() );
+            emitChanged();
         }
 
         // --- QList-style comfort ;) ---
@@ -144,7 +153,6 @@ namespace __qobjectsqmllist {
         }
 
     protected:
-        virtual void setLength( int value ) = 0;
         virtual void emitChanged() = 0;
     };
 }
@@ -176,19 +184,13 @@ namespace __qobjectsqmllist {
 #define DECLARE_Q_OBJECT_LIST_MODEL( TYPE )                                                \
     class QObjectListModel_##TYPE : public __qobjectsqmllist::QObjectListModelBase<TYPE> { \
         Q_OBJECT                                                                           \
-        Q_PROPERTY( int length MEMBER m_length NOTIFY lengthChanged )                      \
+        Q_PROPERTY( int length READ count NOTIFY changed )                                 \
+        Q_PROPERTY( int isEmpty READ isEmpty NOTIFY changed )                              \
                                                                                            \
     Q_SIGNALS:                                                                             \
-        void lengthChanged();                                                              \
         void changed();                                                                    \
                                                                                            \
     protected:                                                                             \
-        virtual void setLength( int value ) {                                              \
-            m_length = value;                                                              \
-            emit lengthChanged();                                                          \
-            emit emitChanged();                                                            \
-        }                                                                                  \
-                                                                                           \
         virtual void emitChanged() {                                                       \
             emit changed();                                                                \
         }                                                                                  \
@@ -196,11 +198,9 @@ namespace __qobjectsqmllist {
         Q_INVOKABLE QVariant item( int i ) {                                               \
             if ( i < 0 || i >= count() )                                                   \
                 return QVariant();                                                         \
+                                                                                           \
             auto obj = at( i ).data();                                                     \
             QQmlEngine::setObjectOwnership( obj, QQmlEngine::CppOwnership );               \
             return QVariant::fromValue( obj );                                             \
         }                                                                                  \
-                                                                                           \
-    private:                                                                               \
-        int m_length = 0;                                                                  \
     };
